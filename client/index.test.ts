@@ -11,8 +11,7 @@ test("Accounts are initialized", async () => {
     const connection = new Connection("http://localhost:8899");
     const txn = await connection.requestAirdrop(adminAccount.publicKey, 5 * LAMPORTS_PER_SOL);
     await connection.confirmTransaction(txn);
-    console.log("here");
-    
+
     const lamports = await connection.getMinimumBalanceForRentExemption(COUNTER_SIZE);
     const ix = SystemProgram.createAccount({
         fromPubkey: adminAccount.publicKey,
@@ -25,8 +24,6 @@ test("Accounts are initialized", async () => {
     createDataAccountTransaction.add(ix);
     const signature = await connection.sendTransaction(createDataAccountTransaction, [adminAccount, dataAccount]);
     await connection.confirmTransaction(signature);
-    console.log("now here");
-    
 
     const counterAccount = await connection.getAccountInfo(dataAccount.publicKey);
     if (!counterAccount) {
@@ -35,4 +32,11 @@ test("Accounts are initialized", async () => {
     const counter = borsh.deserialize(schema, counterAccount.data) as CounterAccount;
     console.log(counter.counter);
     expect(counter.counter).toBe(0);
-})  
+});
+
+test("Counter does increase", async () => {
+    const tx = new Transaction();
+
+    // tx.add()
+})
+

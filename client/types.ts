@@ -16,46 +16,54 @@ export const schema: borsh.Schema = {
 
 export const COUNTER_SIZE = borsh.serialize(schema, new CounterAccount({ count: 0 })).length;
 
+
 export enum CounterInstructionType {
   Increment = 0,
   Decrement = 1,
 }
 
-class IncrementInstruction {
+export class IncrementInstruction {
   value: number;
   constructor({ value }: { value: number }) {
     this.value = value;
   }
 }
 
-class DecrementInstruction {
+export class DecrementInstruction {
   value: number;
   constructor({ value }: { value: number }) {
     this.value = value;
   }
 }
 
-const instructionSchema = new Map<any, any>([
-  [IncrementInstruction, { value: 'u32' }],
-  [DecrementInstruction, { value: 'u32' }],
-]);
+export const incrementSchema: borsh.Schema = {
+  struct: {
+    value: 'u32'
+  }
+}
 
-export function createIncrementInstructionData(value: number): Buffer {
+export const decrementSchema: borsh.Schema = {
+  struct: {
+    value: 'u32'
+  }
+}
+
+export const instructionSchema: borsh.Schema = {
+  enum: [
+    incrementSchema,
+    decrementSchema
+  ]
+}
+
+export function createIncrementInstructionData(value: number) {
   const instruction = new IncrementInstruction({ value });
-  const serializedData = borsh.serialize(instructionSchema as unknown as borsh.Schema, instruction);
-  const buffer = Buffer.alloc(1 + serializedData.length);
-  buffer.writeUInt8(CounterInstructionType.Increment, 0);
-  Buffer.from(serializedData).copy(buffer, 1);
-  return buffer;
+  const serializedData = Buffer.from(borsh.serialize(instructionSchema, instruction));
+  return serializedData;
 }
 
-export function createDecrementInstructionData(value: number): Buffer {
+export function createDecrementInstructionData(value: number) {
   const instruction = new DecrementInstruction({ value });
-  const serializedData = borsh.serialize(instructionSchema as unknown as borsh.Schema, instruction);
-  const buffer = Buffer.alloc(1 + serializedData.length);
-  buffer.writeUInt8(CounterInstructionType.Decrement, 0);
-  Buffer.from(serializedData).copy(buffer, 1);
-  return buffer;
+  const serializedData = Buffer.from(borsh.serialize(instructionSchema, instruction));
+  return serializedData;
 }
-
 

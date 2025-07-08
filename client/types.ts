@@ -1,69 +1,61 @@
 import * as borsh from "borsh";
 
 export class CounterAccount {
-    counter: number
+  counter: number
 
-    constructor({ count }: { count: number }) {
-        this.counter = count;
-    }
+  constructor({ count }: { count: number }) {
+    this.counter = count;
+  }
 }
 
 export const schema: borsh.Schema = {
-    struct: {
-        counter: 'u32'
-    }
+  struct: {
+    counter: 'u32'
+  }
 }
 
 export const COUNTER_SIZE = borsh.serialize(schema, new CounterAccount({ count: 0 })).length;
 
-
-export enum CounterInstructionType {
-  Increment = 0,
-  Decrement = 1,
-}
-
-export class IncrementInstruction {
-  value: number;
-  constructor({ value }: { value: number }) {
-    this.value = value;
-  }
-}
-
-export class DecrementInstruction {
-  value: number;
-  constructor({ value }: { value: number }) {
-    this.value = value;
-  }
-}
-
-export const incrementSchema: borsh.Schema = {
-  struct: {
-    value: 'u32'
-  }
-}
-
-export const decrementSchema: borsh.Schema = {
-  struct: {
-    value: 'u32'
-  }
-}
-
 export const instructionSchema: borsh.Schema = {
   enum: [
-    incrementSchema,
-    decrementSchema
+    {
+      struct: {
+        Increment: {
+          struct: {
+            value: 'u32'
+          }
+        }
+      }
+    },
+    {
+      struct: {
+        Decrement: {
+          struct: {
+            value: 'u32'
+          }
+        }
+      }
+    }
   ]
-}
+};
+
 
 export function createIncrementInstructionData(value: number) {
-  const instruction = new IncrementInstruction({ value });
+  const instruction = {
+    Increment: {
+      value
+    }
+  };
   const serializedData = Buffer.from(borsh.serialize(instructionSchema, instruction));
   return serializedData;
 }
 
 export function createDecrementInstructionData(value: number) {
-  const instruction = new DecrementInstruction({ value });
+  const instruction = {
+    Decrement: {
+      value
+    }
+  };
   const serializedData = Buffer.from(borsh.serialize(instructionSchema, instruction));
   return serializedData;
 }
-
